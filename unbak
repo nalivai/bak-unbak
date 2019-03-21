@@ -3,7 +3,7 @@ backupname=$1.bak
 if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
 	cp -r $backupname $1
 	echo "restoring file $backupname"
-	if [[ $2 -eq "-r" ]]; then
+	if [[ $2 == "-r" ]]; then
 		rm -rf $backupname
 		echo "and removing backup"
 	fi
