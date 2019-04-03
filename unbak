@@ -1,4 +1,11 @@
 #!/bin/bash
+if [[ ! $1 ]]; then
+	echo restoring previously backed up copy of the file 
+	echo     usage: unbak FILENAME [-r]
+	echo            -r: deletes the copy
+	exit 1
+fi
+
 backupname=$1.bak
 if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
 	cp -r $backupname $1
