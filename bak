@@ -3,6 +3,7 @@ if [[ ! $1 ]]; then
 	echo "creates a copy of the file or dirrectory in the same dirrectory with the same name but with added .bak "
 	echo "    usage: bak FILENAME [-no]"
 	echo "    -no: no overrides, do not overrides existing copy"
+	exit 1
 fi
 
 if [[ $1 ]] && ([[ -f $1 ]] || [[ -d $1 ]]); then
