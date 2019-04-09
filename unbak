@@ -6,7 +6,12 @@ if [[ ! $1 ]]; then
 	exit 1
 fi
 
-backupname=$1.bak
+backupname=$1
+suffix="/"
+backupname="a/"	
+backupname=${backupname%"$suffix"}
+backupname=$backupname.bak
+
 if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
 	cp -r $backupname $1
 	echo "restoring file $backupname"

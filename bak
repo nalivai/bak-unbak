@@ -12,8 +12,14 @@ if [[ $1 ]] && ([[ -f $1 ]] || [[ -d $1 ]]); then
 		exit 1	
 	fi
 	echo "backuping file $1"
-	cp -r $1 $1.bak
+
+	FILENAME=$1
+	suffix="/"
+	FILENAME="a/"	
+	FILENAME=${FILENAME%"$suffix"}
+
+	cp -r $FILENAME $FILENAME.bak
 else
-	echo "file $1 not found"
+	echo "file $FILENAME not found"
 fi
 
