@@ -13,11 +13,11 @@ backupname=${backupname%"$suffix"}
 backupname=$backupname.bak
 
 if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
-	cp -r $backupname $1
 	echo "restoring file $backupname"
+	cp -r $backupname $1
 	if [[ $2 == "-r" ]]; then
-		rm -rf $backupname
 		echo "and removing backup"
+		rm -rf $backupname
 	fi
 else
 	echo "backuped file $1 not found"
