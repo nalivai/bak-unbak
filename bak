@@ -15,7 +15,6 @@ if [[ $1 ]] && ([[ -f $1 ]] || [[ -d $1 ]]); then
 
 	FILENAME=$1
 	suffix="/"
-	FILENAME="a/"	
 	FILENAME=${FILENAME%"$suffix"}
 
 	cp -r $FILENAME $FILENAME.bak
