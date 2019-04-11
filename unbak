@@ -8,7 +8,6 @@ fi
 
 backupname=$1
 suffix="/"
-backupname="a/"	
 backupname=${backupname%"$suffix"}
 restoredname=$backupname
 backupname=$backupname.bak
