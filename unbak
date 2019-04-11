@@ -10,11 +10,16 @@ backupname=$1
 suffix="/"
 backupname="a/"	
 backupname=${backupname%"$suffix"}
+restoredname=$backupname
 backupname=$backupname.bak
+
 
 if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
 	echo "restoring file $backupname"
-	cp -r $backupname $1
+	if [[ -d $backupname ]]; then
+		backupname="$backupname/"
+	fi
+	cp -ra $backupname/. $restoredname
 	if [[ $2 == "-r" ]]; then
 		echo "and removing backup"
 		rm -rf $backupname
