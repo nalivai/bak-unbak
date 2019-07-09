@@ -1,24 +1,63 @@
 #!/bin/bash
 if [[ ! $1 ]]; then
 	echo "creates a copy of the file or dirrectory in the same dirrectory with the same name but with added .bak "
-	echo "    usage: bak FILENAME [-no]"
-	echo "    -no: no overrides, do not overrides existing copy"
+	echo "    usage: bak FILENAME [OPTIONS]"
+	echo "    OPTIONS:"
+	echo "    	-n --no_override: do not overrides existing copy"
+	echo "    	-d --delete: removes original"
 	exit 1
 fi
 
-if [[ $1 ]] && ([[ -f $1 ]] || [[ -d $1 ]]); then
-	if [[ $2 ]] && [[ $2 == "-no" ]] && ( [[ -f $1 ]] || [[ -d $1 ]] ); then
-		echo "$1.bak already exists, exiting"
-		exit 1	
-	fi
-	echo "backuping file $1"
+OPTS=`getopt -o nd --long no_override,delete -n 'parse-options' -- "$@"`
 
-	FILENAME=$1
-	suffix="/"
-	FILENAME=${FILENAME%"$suffix"}
 
-	cp -r $FILENAME $FILENAME.bak
-else
-	echo "file $FILENAME not found"
+if [[ -f $1 ]] || [[ -d $1 ]]; then 	
+	FILE=$1
+	# suffix="/"
+	# FILE=${FILE%"$suffix"}
+	TARGETFILE=$1.bak
+	shift;
+else 
+	echo "file $1 not found" 
+	exit 1
 fi
+
+while true; do
+case "$1" in
+	-n | --no_override 		) no_override=1; shift ;;
+	-d | --delete 			) delete=1; shift ;;
+	-- ) shift; break ;;
+	* ) break ;;
+esac
+done
+
+if [[ no_override -eq 1 ]] && ( [[ -f $TARGETFILE ]] || [[ -d $TARGETFILE ]] ); then
+	echo "$TARGETFILE already exists, exiting"
+	exit 2	
+fi
+
+echo "backuping file $FILE to $TARGETFILE"
+if [[ delete == 1 ]]; then
+	mv -f $FILE $TARGETFILE  
+else 
+	cp -Trfa --strip-trailing-slashes $FILE $TARGETFILE
+fi
+
+exit $?
+
+# if [[ $1 ]] && ([[ -f $1 ]] || [[ -d $1 ]]); then
+# 	if [[ $2 ]] && [[ $2 == "-no" ]] && ( [[ -f $1 ]] || [[ -d $1 ]] ); then
+# 		echo "$1.bak already exists, exiting"
+# 		exit 1	
+# 	fi
+# 	echo "backuping file $1"
+
+# 	FILENAME=$1
+# 	suffix="/"
+# 	FILENAME=${FILENAME%"$suffix"}
+
+# 	cp -r $FILENAME $FILENAME.bak
+# else
+# 	echo "file $FILENAME not found"
+# fi
 

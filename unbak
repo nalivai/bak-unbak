@@ -18,7 +18,9 @@ if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
 	if [[ -d $backupname ]]; then
 		backupname="$backupname/"
 	fi
-	cp -ra $backupname/. $restoredname
+	# rm $restoredname -rf
+	cp -raT $backupname $restoredname
+	# cp -raT $backupname/. $restoredname
 	if [[ $2 == "-r" ]]; then
 		echo "and removing backup"
 		rm -rf $backupname
