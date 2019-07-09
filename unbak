@@ -12,8 +12,17 @@ backupname=${backupname%"$suffix"}
 restoredname=$backupname
 backupname=$backupname.bak
 
+shift;
+OPTS=`getopt -o rd --long delete -n 'parse-options' -- "$@"`
+while true; do
+case "$1" in
+	-d | --delete | -r		) delete=1; shift ;;
+	-- ) shift; break ;;
+	* ) break ;;
+esac
+done
 
-if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
+if [[ -f $backupname ]] || [[ -d $backupname ]]; then
 	echo "restoring file $backupname"
 	if [[ -d $backupname ]]; then
 		backupname="$backupname/"
@@ -21,11 +30,11 @@ if [[ $1 ]] && ([[ -f $backupname ]] || [[ -d $backupname ]]); then
 	rm $restoredname -rf
 	cp -raT $backupname $restoredname
 	# cp -raT $backupname/. $restoredname
-	if [[ $2 == "-r" ]]; then
+	if [[ $delete == 1 ]]; then
 		echo "and removing backup"
 		rm -rf $backupname
 	fi
 else
-	echo "backuped file $1 not found"
+	echo "backuped file $backupname not found"
 fi
 
