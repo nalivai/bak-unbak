@@ -19,7 +19,7 @@ else
 	exit 1
 fi
 
-OPTS=`getopt -o nd --long no_override,delete -n 'parse-options' -- "$@"`
+OPTS=`getopt -o nrd --long no_override,delete -n 'parse-options' -- "$@"`
 
 while true; do
 case "$1" in
