@@ -9,8 +9,15 @@ fi
 backupname=$1
 suffix="/"
 backupname=${backupname%"$suffix"}
-restoredname=$backupname
-backupname=$backupname.bak
+
+extension="${backupname##*.}"
+
+if [[ $extension != bak ]]; then
+	restoredname=$backupname
+	backupname=$backupname.bak
+else
+	restoredname="${backupname%.*}"
+fi
 
 shift;
 OPTS=`getopt -o rd --long delete -n 'parse-options' -- "$@"`
