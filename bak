@@ -1,67 +1,70 @@
 #!/bin/bash
-if [[ ! $1 ]]; then
+
+show_help(){
 	echo "creates a copy of the file or dirrectory in the same dirrectory with the same name but with added .bak "
-	echo "    usage: bak FILENAME [OPTIONS]"
-	echo "    OPTIONS:"
-	echo "    	-n --no_override: do not overrides existing copy"
-	echo "    	-d --delete: removes original"
+	echo "    usage: bak filename [options]"
+	echo "    options:"
+	echo "           -h:                      show help and exit"
+	echo "    	     -n    --no_override:     do not override existing copy"
+	echo "    	     -d -r --delete: 	     removes original"
 	exit 1
+}
+
+if [[ ! $1 ]]; then
+	show_help
 fi
 
-if [[ -f $1 ]] || [[ -d $1 ]]; then 	
-	FILE=$1
-	# suffix="/"
-	# FILE=${FILE%"$suffix"}
-	TARGETFILE=$1.bak
-	shift;
-else 
-	echo "file $1 not found" 
-	exit 1
-fi
+OPTS=`getopt -o nrdh --long no_override,delete,remove,help -n 'parse-options' -- "$@"`
 
-OPTS=`getopt -o nrd --long no_override,delete -n 'parse-options' -- "$@"`
-
-while true; do
-case "$1" in
-	-n | --no_override 		) no_override=1; shift ;;
-	-d | --delete | -r		) delete=1; shift ;;
-	-- ) shift; break ;;
-	* ) break ;;
-esac
+for i in $OPTS; do
+	case "$i" in
+		-h | --help							) show_help; ;;
+		-n | --no_override 					) no_override=true;  ;;
+		-d | --delete | -r | --remove		) delete=true;  ;;
+		-- ) break ;;
+		* ) break ;;
+	esac
 done
 
-if [[ no_override -eq 1 ]] && ( [[ -f $TARGETFILE ]] || [[ -d $TARGETFILE ]] ); then
-	echo "$TARGETFILE already exists, exiting"
-	exit 2	
+target_supplied=0
+for i in $@; do
+	if [[ ${i:0:1} != "-" ]]; then
+		if [[ $target_supplied == 0 ]]; then
+			if [[ -f $i ]] || [[ -d $i ]]; then
+				original=$i
+				copy=$i.bak
+				target_supplied=1
+			else 
+				echo -e "File \033[33m$i\033[0m not found"
+				exit 1
+			fi
+		else
+			echo "Only one target could be copied"
+			exit 1
+		fi
+	fi
+done
+
+if [[ $original = "" ]]; then
+	show_help	
 fi
 
+if [[ $no_override == true ]] && ( [[ -f $copy ]] || [[ -d $copy ]] ); then
+	echo -e "\033[33m$copy\033[0m already exists, doing nothing"
+	exit 2
+fi
 
-echo "backuping file $FILE to $TARGETFILE"
-if [[ $delete == 1 ]]; then
-	cp -Trfa --strip-trailing-slashes $FILE $TARGETFILE
+echo -en "Backuping file \033[33m$original\033[0m to \033[33m$copy\033[0m"
+cp -Trfa --strip-trailing-slashes $original $copy
+if [[ $delete == true ]]; then
 	if [[ $? == 0 ]]; then
-		echo "and removing the original"
-		rm -rf $FILE
+		echo -e " and removing the original (\033[33m$original\033[0m)"
+		rm -rf $original
+	else
+		echo " (copy failed with error $?, not removing anything)"
 	fi
 else 
-	cp -Trfa --strip-trailing-slashes $FILE $TARGETFILE
+	echo
 fi
 
 exit $?
-
-# if [[ $1 ]] && ([[ -f $1 ]] || [[ -d $1 ]]); then
-# 	if [[ $2 ]] && [[ $2 == "-no" ]] && ( [[ -f $1 ]] || [[ -d $1 ]] ); then
-# 		echo "$1.bak already exists, exiting"
-# 		exit 1	
-# 	fi
-# 	echo "backuping file $1"
-
-# 	FILENAME=$1
-# 	suffix="/"
-# 	FILENAME=${FILENAME%"$suffix"}
-
-# 	cp -r $FILENAME $FILENAME.bak
-# else
-# 	echo "file $FILENAME not found"
-# fi
-

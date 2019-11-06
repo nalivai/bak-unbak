@@ -1,47 +1,82 @@
 #!/bin/bash
+
+show_help(){
+	echo "restoring previously backed up copy of the file"
+	echo "    usage: unbak filename [options]"
+	echo "    options:"	            
+	echo "           -h:                             show help and exit"
+	echo "           -n | --no_override:             do not override existing original"
+	echo "           -d | --delete | -r | --remove:  deletes the copy"
+	exit 1 
+}
+
 if [[ ! $1 ]]; then
-	echo restoring previously backed up copy of the file 
-	echo     usage: unbak FILENAME [-r]
-	echo            -r: deletes the copy
-	exit 1
+	show_help
 fi
 
-backupname=$1
-suffix="/"
-backupname=${backupname%"$suffix"}
+target_supplied=0
+for i in $@; do
+	if [[ ${i:0:1} != "-" ]]; then
+		if [[ $target_supplied == 0 ]]; then
 
-extension="${backupname##*.}"
+			extension="${i##*.}"
+			if [[ $extension == bak ]]; then
+				copy=$i
+				original=${i%.*}
+			else 
+				copy=$i.bak
+				original=$i
+			fi
 
-if [[ $extension != bak ]]; then
-	restoredname=$backupname
-	backupname=$backupname.bak
-else
-	restoredname="${backupname%.*}"
-fi
-
-shift;
-OPTS=`getopt -o rd --long delete -n 'parse-options' -- "$@"`
-while true; do
-case "$1" in
-	-d | --delete | -r		) delete=1; shift ;;
-	-- ) shift; break ;;
-	* ) break ;;
-esac
+			if [[ -f $copy ]] || [[ -d $copy ]]; then
+				target_supplied=1
+			else
+				echo -e "File \033[33m$copy\033[0m not found"
+				exit 1
+			fi
+		else
+			echo "Only one target should be specified"
+			exit 1
+		fi
+	fi
 done
 
-if [[ -f $backupname ]] || [[ -d $backupname ]]; then
-	echo "restoring file $backupname"
-	if [[ -d $backupname ]]; then
-		backupname="$backupname/"
-	fi
-	rm $restoredname -rf
-	cp -raT $backupname $restoredname
-	# cp -raT $backupname/. $restoredname
-	if [[ $delete == 1 ]]; then
-		echo "and removing backup"
-		rm -rf $backupname
-	fi
-else
-	echo "backuped file $backupname not found"
+if [[ $copy = "" ]]; then
+	show_help	
 fi
 
+
+OPTS=`getopt -o nrdh --long no_override,delete,remove,help -n 'parse-options' -- "$@"`
+
+for i in $OPTS; do
+	case "$i" in
+		-h | --help						) show_help; ;;
+		-n | --no_override 				) no_override=true;  ;;
+		-d | --delete | -r | --remove	) delete=true;  ;;
+		-- ) break ;;
+		* ) break ;;
+	esac
+done
+
+if [[ $no_override == true ]] && ( [[ -f $original ]] || [[ -d $original ]] ); then
+	echo -e "\033[33m$original\033[0m already exists, doing nothing"
+	exit 2
+fi
+
+
+echo -e "Restoring file \033[33m$copy\033[0m to \033[33m$original\033[0m"
+
+rm -rf $original
+
+rmres=$?
+
+cp -Trfa --strip-trailing-slashes $copy $original
+
+cpres=$?
+
+if [[ $delete == true ]] && [[ $rmres == 0 ]] && [[ $cpres == 0 ]]; then
+	rm -rf $copy
+	echo -e "And removing the backup (\033[33m$copy\033[0m)"
+fi
+
+exit $?
