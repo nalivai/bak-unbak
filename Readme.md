@@ -25,4 +25,13 @@ Usage
 
 Instalation
 ===
-You can use make to install and remove this ('make install' and 'make remove' respectively). Or you can place scripts wherever you want, it's just bash scripts, do whatever you want, really, it's your world.
+You can use make to install and remove this 
+```
+make install
+```
+and 
+```
+make uninstall
+``` 
+respectively. 
+Or you can place scripts wherever you want, it's just bash scripts, do whatever you want, really, it's your world.
