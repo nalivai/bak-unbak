@@ -1,6 +1,6 @@
 What is it?
 ===
-This is a little bash scripts for quick and dirty backuping and restoring files before editing. It places copy of the file with added .bak at the end in the same dirrectory as the file. Works on a dirrectories too.
+This is a little bunch of bash scripts for quick and dirty backuping and restoring files before editing. It places copy of the file with added .bak at the end in the same dirrectory as the file. Works on a dirrectories too.
 
 Usage
 ===
