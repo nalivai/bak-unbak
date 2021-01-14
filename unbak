@@ -14,13 +14,26 @@ if [[ ! $1 ]]; then
 	show_help
 fi
 
+OPTS=`getopt -o nrdh --long no_override,delete,remove,help -n 'parse-options' -- "$@"`
+
+for i in $OPTS; do
+	case "$i" in
+		-h | --help						) show_help; ;;
+		-n | --no_override 				) no_override=true; ;;
+		-d | --delete | -r | --remove	) delete=true; ;;
+		-- ) break ;;
+		* ) break ;;
+	esac
+done
+
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 target_supplied=0
 for i in $@; do
 	if [[ ${i:0:1} != "-" ]]; then
 		if [[ $target_supplied == 0 ]]; then
-
 			extension="${i##*.}"
-			if [[ $extension == bak ]]; then
+			if [[ $extension == bak ]] && [[ $extension != $i ]]; then
 				copy=$i
 				original=${i%.*}
 			else 
@@ -32,10 +45,12 @@ for i in $@; do
 				target_supplied=1
 			else
 				echo -e "File \033[33m$copy\033[0m not found"
+				IFS=$SAVEIFS
 				exit 1
 			fi
 		else
 			echo "Only one target should be specified"
+			IFS=$SAVEIFS
 			exit 1
 		fi
 	fi
@@ -46,20 +61,10 @@ if [[ $copy = "" ]]; then
 fi
 
 
-OPTS=`getopt -o nrdh --long no_override,delete,remove,help -n 'parse-options' -- "$@"`
-
-for i in $OPTS; do
-	case "$i" in
-		-h | --help						) show_help; ;;
-		-n | --no_override 				) no_override=true;  ;;
-		-d | --delete | -r | --remove	) delete=true;  ;;
-		-- ) break ;;
-		* ) break ;;
-	esac
-done
 
 if [[ $no_override == true ]] && ( [[ -f $original ]] || [[ -d $original ]] ); then
 	echo -e "\033[33m$original\033[0m already exists, doing nothing"
+	IFS=$SAVEIFS
 	exit 2
 fi
 
@@ -67,11 +72,9 @@ fi
 echo -e "Restoring file \033[33m$copy\033[0m to \033[33m$original\033[0m"
 
 rm -rf $original
-
 rmres=$?
 
 cp -Trfa --strip-trailing-slashes $copy $original
-
 cpres=$?
 
 if [[ $delete == true ]] && [[ $rmres == 0 ]] && [[ $cpres == 0 ]]; then
@@ -79,4 +82,5 @@ if [[ $delete == true ]] && [[ $rmres == 0 ]] && [[ $cpres == 0 ]]; then
 	echo -e "And removing the backup (\033[33m$copy\033[0m)"
 fi
 
+IFS=$SAVEIFS
 exit $?

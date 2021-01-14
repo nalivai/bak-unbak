@@ -26,24 +26,31 @@ for i in $OPTS; do
 	esac
 done
 
+
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 target_supplied=0
 for i in $@; do
 	if [[ ${i:0:1} != "-" ]]; then
 		if [[ $target_supplied == 0 ]]; then
-			if [[ -f $i ]] || [[ -d $i ]]; then
-				original=$i
-				copy=$i.bak
+
+			if [[ -f "$i" ]] || [[ -d "$i" ]]; then
+				original="$i"
+				copy="$i.bak"
 				target_supplied=1
 			else 
 				echo -e "File \033[33m$i\033[0m not found"
+				IFS=$SAVEIFS
 				exit 1
 			fi
 		else
 			echo "Only one target could be copied"
+			IFS=$SAVEIFS
 			exit 1
 		fi
 	fi
 done
+
 
 if [[ $original = "" ]]; then
 	show_help	
@@ -51,6 +58,7 @@ fi
 
 if [[ $no_override == true ]] && ( [[ -f $copy ]] || [[ -d $copy ]] ); then
 	echo -e "\033[33m$copy\033[0m already exists, doing nothing"
+	IFS=$SAVEIFS
 	exit 2
 fi
 
@@ -66,5 +74,7 @@ if [[ $delete == true ]]; then
 else 
 	echo
 fi
+
+IFS=$SAVEIFS
 
 exit $?
